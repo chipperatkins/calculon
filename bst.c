@@ -6,7 +6,7 @@
 
 //TODO allow duplicates
 
-void helper(bst *b,node *root, node *n);
+static void helper(bst *b,node *root, node *n);
 
 bst *newBst()
 {
@@ -24,10 +24,10 @@ void insert(bst *b, node *n)
         helper(b,b->root,n);
 }
 
-void helper(bst *b,node *current, node *n)
+static void helper(bst *b,node *current, node *n)
 {
     current = b->root;
-    if (n->value.rval < current->value.rval) //n is left
+    if (n->value->rval < current->value->rval) //n is left
     {
         if (current->left == 0)
         {
@@ -49,21 +49,5 @@ void helper(bst *b,node *current, node *n)
 
 node *deleteNode(bst *b, node *n)
 {
-    node *temp;
-    if (n->left == 0 && n->right == 0)
-    {
-        temp = n;
-        node n = 0;
-    }
-    else if (n->left != 0 && n->right == 0)
-    {
-        temp = n;
-        n = n->left;
-    }
-    else if (n->left == 0 && n->right != 0)
-    {
-        temp = n;
-        n = n->right;
-    }
-
+    return 0;
 }

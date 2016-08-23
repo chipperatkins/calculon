@@ -16,16 +16,21 @@ node *newValueNode(value *v,node *n)
     return p;
     }
 
-node *newBstNode(value *v, node *l, node *r, node *p)
+node *newBstNode(value *v, char* key, node *l, node *r, node *p)
 {
     node *n= newNode();
     n->value = v;
+    n->key = key;
     n->left = l;
     n->right = r;
     n->parent = p;
     return n;
 }
 
+char* getKey(node* n)
+{
+    return n->key;
+}
 /*************** private methods *************/
 
 static node *newNode()
@@ -34,3 +39,5 @@ static node *newNode()
     if (n == 0) { fprintf(stderr,"out of memory"); exit(-1); }
     return n;
     }
+
+
