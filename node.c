@@ -8,7 +8,7 @@ static node *newNode(void);
 
 /*************** public interface *************/
 
-node *newValueNode(value v,node *n)
+node *newValueNode(value *v,node *n)
     {
     node *p = newNode();
     p->value = v;
@@ -16,7 +16,7 @@ node *newValueNode(value v,node *n)
     return p;
     }
 
-node *newBstNode(value v, node *l, node *r, node *p)
+node *newBstNode(value *v, node *l, node *r, node *p)
 {
     node *n= newNode();
     n->value = v;

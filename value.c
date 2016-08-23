@@ -1,54 +1,82 @@
-#include "value.h"
 #include <stdio.h>
 #include <stdlib.h>
+#include "value.h"
 
-static value *newValue(int);
+char *INTEGER = "INTEGER";
+char *REAL = "REAL";
+char *STRING = "STRING";
+char *VARIABLE = "VARIABLE";
+char *OPERATOR = "OPERATOR";
+char *SEMICOLON = "SEMICOLON";
 
-/**** Public Interface ****/
+static value *newValue(char *);
 
-int INTEGER = 0;
-int REAL = 1;
-int STRING = 2;
-int VARIABLE = 3;
+/*************** public interface *************/
 
-value *newValueI(int i)
-{
-    value *v = newValue(INTEGER);
-    v->ival = i;
-    return v;
-}
+value *
+newIntegerValue(int v)
+    {
+    value *n = newValue(INTEGER);
+    n->ival = v;
+    return n;
+    }
 
-value *newValueR(double d)
-{
-    value *v = newValue(REAL);
-    v->rval = d;
-    return v;
-}
+value *
+newRealValue(double v)
+    {
+    value *n = newValue(REAL);
+    n->rval = v;
+    return n;
+    }
 
-value *newValueS(char *c)
-{
-    value *v = newValue(STRING);
-    v->sval = c;
-    return v;
-}
+value *
+newStringValue(char *v)
+    {
+    value *n = newValue(STRING);
+    n->sval = v;
+    return n;
+    }
 
-value *newValueV(char *c)
-{
-    value *v = newValue(VARIABLE);
-    v->sval = c;
-    return v;
-}
+value *
+newVariableValue(char *v)
+    {
+    value *n = newValue(VARIABLE);
+    n->sval = v;
+    return n;
+    }
 
-/**** Private Interface ****/
+value *
+newOperatorValue(char *v)
+    {
+    value *n = newValue(OPERATOR);
+    n->sval = v;
+    return n;
+    }
 
-static value *newValue(int t)
-{
-    value *v;
-    if((v = malloc(sizeof(value))) == 0)
-        printf("%s\n","out of memory");
-    v->type = t;
-    v->ival = 0;
-    v->rval = 0;
-    v->sval = 0;
-    return v;
-}
+void
+displayValue(FILE *fp,value *v)
+    {
+    if (v->type == STRING)
+       fprintf(fp,"\"%s\"",v->sval);
+    else if (v->type == INTEGER)
+       fprintf(fp,"%d",v->ival);
+    else if (v->type == REAL)
+       fprintf(fp,"%f",v->rval);
+    else if (v->type == VARIABLE)
+       fprintf(fp,"%s",v->sval);
+    else if (v->type == OPERATOR)
+       fprintf(fp,"%s",v->sval);
+    else
+       fprintf(fp,"<UNKNOWN VALUE TYPE>");
+    }
+
+/*************** private methods *************/
+
+value *
+newValue(char *t)
+    {
+    value *n = malloc(sizeof(value));
+    if (n == 0) { fprintf(stderr,"out of memory"); exit(-1); }
+    n->type = t;
+    return n;
+    }
