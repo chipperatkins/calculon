@@ -8,6 +8,8 @@
 
 static void helper(bst *b,node *root, node *n);
 
+/***** Public Methods *****/
+
 bst *newBst()
 {
     bst *b = (bst *) malloc(sizeof(bst));
@@ -23,6 +25,33 @@ void insert(bst *b, node *n)
     else
         helper(b,b->root,n);
 }
+
+node *deleteNode(bst *b, node *n)
+{
+    return 0;
+}
+
+node *findMin(node *n)
+{
+    if (n == 0)
+        return 0;
+    if (n->left != 0)
+        return findMin(n->left);
+    else
+        return n;
+}
+
+node *findMax(node *n)
+{
+    if (n == 0)
+        return 0;
+    if (n->right != 0)
+        return findMax(n->right);
+    else
+        return n;
+}
+
+/***** Private Method *****/
 
 static void helper(bst *b,node *current, node *n)
 {
@@ -45,9 +74,4 @@ static void helper(bst *b,node *current, node *n)
         else
             helper(b,current->right, n);
     }
-}
-
-node *deleteNode(bst *b, node *n)
-{
-    return 0;
 }
