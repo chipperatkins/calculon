@@ -3,67 +3,105 @@
 #include "value.h"
 #include "node.h"
 #include "bst.h"
+#include "string.h"
 
 //TODO allow duplicates
 
-void helper(bst *b,node *root, node *n);
+/***** Public Methods *****/
 
 bst *newBst()
 {
     bst *b = (bst *) malloc(sizeof(bst));
     if (b == 0) { fprintf(stderr,"out of memory"); exit(-1); }
-    b->root = 0;
     return b;
 }
 
-void insert(bst *b, node *n)
+node *insert(node *n, node *d)
 {
-    if (b->root == 0)
-        b->root = n;
+    if (n == 0)
+    {
+        node *t;
+        t = d;
+        return t;
+    }
+    if (strcmp(d->key,n->key)>0)
+        n->right = insert(n->right,d);
+    else if (strcmp(d->key,n->key)<0)
+        n->left = insert(n->left,d);
+    return n;
+}
+
+node *findMin(node *n)
+{
+    if (n == 0)
+        return 0;
+    if (n->left != 0)
+        return findMin(n->left);
     else
-        helper(b,b->root,n);
+        return n;
 }
 
-void helper(bst *b,node *current, node *n)
+node *findMax(node *n)
 {
-    current = b->root;
-    if (n->value.rval < current->value.rval) //n is left
+    if (n == 0)
+        return 0;
+    if (n->right != 0)
+        return findMax(n->right);
+    else
+        return n;
+}
+
+node *deleteNode(node *root, char *key)
+{
+    node *t;
+    if(root == 0)
+        return 0;
+    else if(strcmp(key,root->key)<0)
+        root->left = deleteNode(root->left,key);
+    else if(strcmp(key,root->key)>0)
+        root->right = deleteNode(root->right,key);
+    else
     {
-        if (current->left == 0)
+        if (root->right != 0 && root->left != 0)
         {
-            current->left = n;
+            t = findMin(root->right);
+            root->value = t->value;
+            root->key = t->key;
+            root -> right = deleteNode(root->right,t->key);
         }
         else
-            helper(b,current->left, n);
+        {
+            t = root;
+            if (root->left == 0)
+                root = root->right;
+            else if (root->right == 0)
+                root = root->left;
+            free(t);
+        }
     }
-    else //n id right
+    return root;
+}
+
+node *search(node *r, char *key)
+{
+    if (r == 0)
+        return 0;
+    if (strcmp(key,r->key)>0)
+        return search(r->right,key);
+    else if (strcmp(key,r->key)<0)
+        return search(r->left,key);
+    else
     {
-        if (current->right == 0)
-        {
-            current->right = n;
-        }
-        else
-            helper(b,current->right, n);
+        return r;
     }
 }
 
-node *deleteNode(bst *b, node *n)
+void printInOrder(node *r)
 {
-    node *temp;
-    if (n->left == 0 && n->right == 0)
-    {
-        temp = n;
-        node n = 0;
-    }
-    else if (n->left != 0 && n->right == 0)
-    {
-        temp = n;
-        n = n->left;
-    }
-    else if (n->left == 0 && n->right != 0)
-    {
-        temp = n;
-        n = n->right;
-    }
+    if (r==0)
+        return;
 
+    printf("\"%s\" ",r->key);
+    printInOrder(r->left);
+    printInOrder(r->right);
 }

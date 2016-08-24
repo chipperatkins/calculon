@@ -4,5 +4,9 @@ typedef struct bst
 }bst;
 
 extern bst *newBst();
-extern void insert(bst *b, node *n);
-extern node *deleteNode(bst *b, node *n);
+extern node *insert(node *n, node *d);
+extern node *deleteNode(node *root, char *key);
+extern node *findMin(node *n);
+extern node *findMax(node *n);
+extern node *search(node *root, char *key);
+extern void printInOrder(node *root);
