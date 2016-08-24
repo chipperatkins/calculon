@@ -16,14 +16,13 @@ node *newValueNode(value *v,node *n)
     return p;
     }
 
-node *newBstNode(value *v, char* key, node *l, node *r, node *p)
+node *newBstNode(value *v, char* key, node *l, node *r)
 {
     node *n= newNode();
     n->value = v;
     n->key = key;
     n->left = l;
     n->right = r;
-    n->parent = p;
     return n;
 }
 
