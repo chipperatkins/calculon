@@ -6,7 +6,6 @@
 #include "string.h"
 
 //TODO allow duplicates
-//TODO finishing implementing strcmp()
 
 /***** Public Methods *****/
 
@@ -52,23 +51,23 @@ node *findMax(node *n)
         return n;
 }
 
-node *deleteNode(node *root, node *d)
+node *deleteNode(node *root, char *key)
 {
     node *t;
     if(root == 0)
         return 0;
-    else if(d->key < root->key)
-        root->left = deleteNode(root->left,d);
-    else if(d->key > root->key)
-        root->right = deleteNode(root->right, d);
+    else if(strcmp(key,root->key)<0)
+        root->left = deleteNode(root->left,key);
+    else if(strcmp(key,root->key)>0)
+        root->right = deleteNode(root->right,key);
     else
     {
-        if (root->right && root->left)
+        if (root->right != 0 && root->left != 0)
         {
             t = findMin(root->right);
             root->value = t->value;
             root->key = t->key;
-            root -> right = deleteNode(root->right, t);
+            root -> right = deleteNode(root->right,t->key);
         }
         else
         {
@@ -80,16 +79,16 @@ node *deleteNode(node *root, node *d)
             free(t);
         }
     }
-    return d;
+    return root;
 }
 
 node *search(node *r, char *key)
 {
     if (r == 0)
         return 0;
-    if (key > r->key)
+    if (strcmp(key,r->key)>0)
         return search(r->right,key);
-    else if (key < r->key)
+    else if (strcmp(key,r->key)<0)
         return search(r->left,key);
     else
     {
