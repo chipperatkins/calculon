@@ -18,6 +18,10 @@ static void freeValue(value *);
 static int  priority(char *v1);
 static int  isnum(value *v);
 
+//TODO add variables
+//TODO add file input
+//TODO add args
+
 int main(int argc, char **argv)
 {
     queue *i,*p;
