@@ -17,7 +17,9 @@ static void printValue(FILE *,char *,value *);
 static void freeValue(value *);
 static int  priority(char *v1);
 static int  isnum(value *v);
+static int  isparenthesis(value *v);
 
+//TODO ? marks
 //TODO add variables
 //TODO add file input
 //TODO add args
@@ -45,17 +47,44 @@ int main(int argc, char **argv)
         if (isnum(i->front->value)==1)
             enQ(p, deQ(i));
 
-        else if (i->front->value->type == OPERATOR && s->top==0)
-            push(s,deQ(i));
+        else if (isparenthesis(i->front->value)==1)
+        {
+            if (strcmp(i->front->value->sval,"(")==0)
+                push(s,deQ(i));
+            else
+            {
+                while (strcmp(i->front->value->sval,"(")!=0)
+                {
+                    enQ(p, pop(s));
+                }
+            }
+        }
+
+        else if (i->front->value->type == OPERATOR && s->top == 0)
+            push(s, deQ(i));
+
         else
         {
             while (s->top->value->sval != 0 && priority(i->front->value->sval)<=priority(s->top->value->sval))
             {
+                //TODO figure why pop not popping last * when +
                 enQ(p, pop(s));
             }
             push(s, deQ(i));
         }
+
+            /*if(strcmp(i->front->value->sval,"(")==0)
+                push(s,deQ(i));
+            else
+            {
+                if (strcmp(i->front->value->sval,")")==0)
+                    while (s->top->value->sval != 0 && strcmp(s->top->value->sval,"(")!=0)
+                    {
+                        enQ(p,pop(s));
+                    }
+            }*/
     }
+
     if (s->top != 0)
     {
         while (s->top->value->type == OPERATOR)
@@ -91,6 +120,10 @@ static value *readValue(FILE *fp)
             v = newOperatorValue("*");
         else if (*token == '/')
             v = newOperatorValue("/");
+        else if (*token == '(')
+            v = newParenthesisValue("(");
+        else if (*token == ')')
+            v = newParenthesisValue(")");
         else
             Fatal("The token %s is not a value\n",token);
     }
@@ -121,6 +154,8 @@ static int priority(char *v1)
         return 1;
     else if (strcmp(v1,"*")==0 || strcmp(v1,"/")==0)
         return 2;
+    else if (strcmp(v1,"(")==0 || strcmp(v1,")")==0)
+        return 3;
     else
         return 0;
 }
@@ -128,6 +163,14 @@ static int priority(char *v1)
 static int isnum(value *v)
 {
     if (v->type == INTEGER || v->type == REAL || v->type == VARIABLE)
+        return 1;
+    else
+        return 0;
+}
+
+static int isparenthesis(value *v)
+{
+    if (v->type == PARENTHESIS)
         return 1;
     else
         return 0;

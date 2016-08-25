@@ -8,6 +8,7 @@ char *STRING = "STRING";
 char *VARIABLE = "VARIABLE";
 char *OPERATOR = "OPERATOR";
 char *SEMICOLON = "SEMICOLON";
+char *PARENTHESIS = "PARENTHESIS";
 
 static value *newValue(char *);
 
@@ -53,6 +54,14 @@ newOperatorValue(char *v)
     return n;
     }
 
+value *
+newParenthesisValue(char *v)
+{
+    value *n = newValue(PARENTHESIS);
+    n->sval = v;
+    return n;
+}
+
 void
 displayValue(FILE *fp,value *v)
     {
@@ -66,6 +75,8 @@ displayValue(FILE *fp,value *v)
        fprintf(fp,"%s",v->sval);
     else if (v->type == OPERATOR)
        fprintf(fp,"%s",v->sval);
+    else if (v->type == PARENTHESIS)
+        fprintf(fp,"%s",v->sval);
     else
        fprintf(fp,"<UNKNOWN VALUE TYPE>");
     }
