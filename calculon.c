@@ -15,7 +15,8 @@ void Fatal(char *,...);
 static value *readValue(FILE *);
 static void printValue(FILE *,char *,value *);
 static void freeValue(value *);
-static int  getPrecedence(char *v1, char *v2);
+static int  priority(char *v1);
+static int  isnum(value *v);
 
 int main(int argc, char **argv)
 {
@@ -30,19 +31,38 @@ int main(int argc, char **argv)
     enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
+    enQ(i,newValueNode(readValue(stdin),0));
+    enQ(i,newValueNode(readValue(stdin),0));
+    enQ(i,newValueNode(readValue(stdin),0));
+    enQ(i,newValueNode(readValue(stdin),0));
 
-    while(i != 0)
+    while(i->front != 0)
     {
-        if (i->front->value->type == INTEGER || i->front->value->type == REAL || i->front->value->type == VARIABLE)
-            enQ(p,deQ(i));
+        if (isnum(i->front->value)==1)
+            enQ(p, deQ(i));
+
         else if (i->front->value->type == OPERATOR && s->top==0)
             push(s,deQ(i));
-        else if (i->front->value->type == OPERATOR && s->top!=0)
+        else
         {
-            if (i->front->value->sval )
+            while (s->top->value->sval != 0 && priority(i->front->value->sval)<=priority(s->top->value->sval))
+            {
+                enQ(p, pop(s));
+            }
+            push(s, deQ(i));
         }
     }
-
+    if (s->top != 0)
+    {
+        while (s->top->value->type == OPERATOR)
+        {
+            enQ(p, pop(s));
+        }
+    }
+    while (p->front != 0)
+    {
+        printValue(stdout, 0, deQ(p)->value);
+    }
     return 0;
 }
 
@@ -91,18 +111,23 @@ static void freeValue(value *v)
     free(v);
 }
 
-static int getPrecedence(char *v1, char *v2)
+static int priority(char *v1)
 {
-    if ((v1 == "+" && v2 == "-") || (v1 == "-" && v2 == "+"))
-        return 0;
-    else if ((v1 == "*" && v2 == "/") || (v1 == "/" && v2 == "*"))
-        return 0;
-    else if ((v1 == "+" || v1 =="-") && (v2 == "/" || v2 == "*"))
-        return -1;
-    else if ((v1 == "*" && v2 == "/") && (v2 == "+" || v2 == "-"))
+    if (strcmp(v1,"+")==0 || strcmp(v1,"-")==0)
         return 1;
+    else if (strcmp(v1,"*")==0 || strcmp(v1,"/")==0)
+        return 2;
+    else
+        return 0;
 }
 
+static int isnum(value *v)
+{
+    if (v->type == INTEGER || v->type == REAL || v->type == VARIABLE)
+        return 1;
+    else
+        return 0;
+}
 void Fatal(char *fmt, ...)
 {
     va_list ap;

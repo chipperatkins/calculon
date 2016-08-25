@@ -6,6 +6,7 @@
 #include "string.h"
 
 //TODO allow duplicates
+//TODO make objective
 
 /***** Public Methods *****/
 
