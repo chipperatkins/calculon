@@ -33,16 +33,12 @@ int main(int argc, char **argv)
     s = newStack();
 
     printf("enter an infix expression: ");
-    for (int j = 0; j < 11; j++)
+    value *v = readValue(stdin);
+    while ((v->type == STRING && strcmp(v->sval,"D")!=0) || v->type !=STRING)
     {
-        enQ(i,newValueNode(readValue(stdin),0));
+        enQ(i, newValueNode(v, 0));
+        v = readValue(stdin);
     }
-    /*enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));*/
 
     while(i->front != 0)
     {
@@ -56,9 +52,8 @@ int main(int argc, char **argv)
             else
             {
                 while (strcmp(s->top->value->sval,"(")!=0)
-                {
                     enQ(p, pop(s));
-                }
+
                 pop(s);
                 deQ(i);
             }
@@ -73,28 +68,13 @@ int main(int argc, char **argv)
             {
                 while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval))
                 {
-                    //TODO figure why pop not popping last * when +
-                    printf("here\n");
                     enQ(p, pop(s));
                 }
                 push(s, deQ(i));
             }
             else
-            {
                 push(s, deQ(i));
-            }
         }
-
-            /*if(strcmp(i->front->value->sval,"(")==0)
-                push(s,deQ(i));
-            else
-            {
-                if (strcmp(i->front->value->sval,")")==0)
-                    while (s->top->value->sval != 0 && strcmp(s->top->value->sval,"(")!=0)
-                    {
-                        enQ(p,pop(s));
-                    }
-            }*/
     }
 
     if (s->top != 0)
@@ -164,7 +144,7 @@ static void freeValue(value *v)
 
 static int priority(char *v1)
 {
-    char * p = "-+*/()";
+    char * p = "=+-*/%^()";
     char * i;
     char c = v1[0];
     int index;
