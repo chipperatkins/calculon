@@ -33,14 +33,16 @@ int main(int argc, char **argv)
     s = newStack();
 
     printf("enter an infix expression: ");
-
+    for (int j = 0; j < 11; j++)
+    {
+        enQ(i,newValueNode(readValue(stdin),0));
+    }
+    /*enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
     enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
-    enQ(i,newValueNode(readValue(stdin),0));
+    enQ(i,newValueNode(readValue(stdin),0));*/
 
     while(i->front != 0)
     {
@@ -53,10 +55,12 @@ int main(int argc, char **argv)
                 push(s,deQ(i));
             else
             {
-                while (strcmp(i->front->value->sval,"(")!=0)
+                while (strcmp(s->top->value->sval,"(")!=0)
                 {
                     enQ(p, pop(s));
                 }
+                pop(s);
+                deQ(i);
             }
         }
 
@@ -65,12 +69,20 @@ int main(int argc, char **argv)
 
         else
         {
-            while (s->top->value->sval != 0 && priority(i->front->value->sval)<=priority(s->top->value->sval))
+            if (isparenthesis(s->top->value) == 0)
             {
-                //TODO figure why pop not popping last * when +
-                enQ(p, pop(s));
+                while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval))
+                {
+                    //TODO figure why pop not popping last * when +
+                    printf("here\n");
+                    enQ(p, pop(s));
+                }
+                push(s, deQ(i));
             }
-            push(s, deQ(i));
+            else
+            {
+                push(s, deQ(i));
+            }
         }
 
             /*if(strcmp(i->front->value->sval,"(")==0)
@@ -87,9 +99,11 @@ int main(int argc, char **argv)
 
     if (s->top != 0)
     {
-        while (s->top->value->type == OPERATOR)
+        while (s->top != 0)
         {
-            enQ(p, pop(s));
+            if (isparenthesis(s->top->value)==0)
+                enQ(p, pop(s));
+            else pop(s);
         }
     }
     while (p->front != 0)
@@ -150,14 +164,14 @@ static void freeValue(value *v)
 
 static int priority(char *v1)
 {
-    if (strcmp(v1,"+")==0 || strcmp(v1,"-")==0)
-        return 1;
-    else if (strcmp(v1,"*")==0 || strcmp(v1,"/")==0)
-        return 2;
-    else if (strcmp(v1,"(")==0 || strcmp(v1,")")==0)
-        return 3;
-    else
-        return 0;
+    char * p = "-+*/()";
+    char * i;
+    char c = v1[0];
+    int index;
+
+    i = strchr(p,c);
+    index = (int)(i-p);
+    return index;
 }
 
 static int isnum(value *v)

@@ -17,12 +17,19 @@ void push (stack *s,node *n)
 {
     if (s->top == 0)
     {
-        s->top = n;
+        node *temp;
+        temp = newValueNode(0,0);
+        temp->next = 0;
+        temp->value = n->value;
+        s->top = temp;
     }
     else
     {
-        n->next = s->top;
-        s->top = n;
+        node *temp;
+        temp = newValueNode(0,0);
+        temp->next = s->top;
+        temp->value = n->value;
+        s->top = temp;
     }
 }
 
