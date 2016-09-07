@@ -6,4 +6,5 @@ typedef struct queue
 
 extern queue *newQ();
 extern void enQ(queue *q,node *n);
+extern void enQQ(queue *q, queue *m); //for merging queues
 extern node* deQ(queue *q);

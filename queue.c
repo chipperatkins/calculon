@@ -25,6 +25,18 @@ void enQ(queue *q,node *n)
     q->rear = n;
 }
 
+void enQQ(queue *q, queue *m)
+{
+    if (q->front == 0 && q->rear == 0)
+    {
+        q->front  = m->front;
+        q->rear = m->rear;
+        return;
+    }
+    q->rear->next = m->front;
+    q->rear = m->rear;
+}
+
 node* deQ(queue *q)
 {
     node *temp = q->front;
