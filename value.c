@@ -9,6 +9,8 @@ char *VARIABLE = "VARIABLE";
 char *OPERATOR = "OPERATOR";
 char *SEMICOLON = "SEMICOLON";
 char *PARENTHESIS = "PARENTHESIS";
+char *VAR = "VAR";
+char *EQUALS = "EQUALS";
 
 static value *newValue(char *);
 
@@ -59,6 +61,28 @@ newParenthesisValue(char *v)
 {
     value *n = newValue(PARENTHESIS);
     n->sval = v;
+    return n;
+}
+
+value*
+newVarValue()
+{
+    value *n = newValue(VAR);
+    return n;
+}
+
+value *
+newEqualsValue(char *v)
+{
+    value *n = newVarValue(EQUALS);
+    n->sval = v;
+    return n;
+}
+
+value*
+newSemicolonValue()
+{
+    value *n = newValue(SEMICOLON);
     return n;
 }
 

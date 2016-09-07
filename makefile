@@ -7,7 +7,7 @@ OBJ = value.o scanner.o node.o queue.o stack.o bst.o calculon.o
 	$(CC) $(CFLAGS) -c -g $<
 
 calculon: $(OBJ)
-	gcc $(CFLAGS) $(OBJ) -o calculon
+	gcc $(CFLAGS) $(OBJ) -lm -o calculon
 
 clean: 
 	$(RM) count *.o *~
