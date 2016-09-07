@@ -18,19 +18,18 @@ static void freeValue(value *);
 static int  priority(char *v1);
 static int  isnum(value *v);
 static int  isparenthesis(value *v);
+static queue*  convert(queue *i);
 
 //TODO ? marks
 //TODO add variables
 //TODO add file input
 //TODO add args
+//TODO ^, math.h????
 
 int main(int argc, char **argv)
 {
     queue *i,*p;
     i = newQ();
-    p = newQ();
-    stack *s;
-    s = newStack();
 
     printf("enter an infix expression: ");
     value *v = readValue(stdin);
@@ -40,6 +39,92 @@ int main(int argc, char **argv)
         v = readValue(stdin);
     }
 
+    p = convert(i);
+
+    /*while (p->front != 0)
+    {
+        printValue(stdout, 0, deQ(p)->value);
+    }*/
+
+    stack* s = newStack();
+    while(p->front!=0)
+    {
+        if (isnum(p->front->value)==1)
+        {
+            push(s,deQ(p));
+        }
+        else if (p->front->value->type == OPERATOR) //must have 2 operands on stack
+        {
+            node* temp,*retVal;
+            temp = pop(s);
+            if (strcmp(p->front->value->sval,"+")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    retVal = newValueNode(newIntegerValue(pop(s)->value->ival + temp->value->ival),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }
+            else if (strcmp(p->front->value->sval,"-")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    retVal = newValueNode(newIntegerValue(pop(s)->value->ival - temp->value->ival),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }
+            else if (strcmp(p->front->value->sval,"*")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    retVal = newValueNode(newIntegerValue(pop(s)->value->ival * temp->value->ival),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }
+            else if (strcmp(p->front->value->sval,"/")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    retVal = newValueNode(newIntegerValue(pop(s)->value->ival / temp->value->ival),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }
+            else if (strcmp(p->front->value->sval,"%")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    retVal = newValueNode(newIntegerValue(pop(s)->value->ival % temp->value->ival),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }
+            /*else if (strcmp(p->front->value->sval,"^")==0)
+            {
+                if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                {
+                    double r = pow(pop(s)->value->ival,temp->value->ival);
+                    retVal = newValueNode(newRealValue(r),0);
+                    push(s,retVal);
+                    deQ(p);
+                }
+            }*/
+        }
+        if (p->front == 0)
+        {
+            printf("%d\n",s->top->value->ival);
+        }
+    }
+    return 0;
+}
+
+static queue* convert(queue *i)
+{
+    queue *p = newQ();
+    stack *s = newStack();
     while(i->front != 0)
     {
         if (isnum(i->front->value)==1)
@@ -86,11 +171,7 @@ int main(int argc, char **argv)
             else pop(s);
         }
     }
-    while (p->front != 0)
-    {
-        printValue(stdout, 0, deQ(p)->value);
-    }
-    return 0;
+    return p;
 }
 
 static value *readValue(FILE *fp)
@@ -118,6 +199,10 @@ static value *readValue(FILE *fp)
             v = newParenthesisValue("(");
         else if (*token == ')')
             v = newParenthesisValue(")");
+        else if (*token == '%')
+            v = newOperatorValue("%");
+        else if (*token == '^')
+            v = newOperatorValue("^");
         else
             Fatal("The token %s is not a value\n",token);
     }
