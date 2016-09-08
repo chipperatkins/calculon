@@ -15,7 +15,6 @@ void Fatal(char *,...);
 
 static value *readValue(FILE *);
 static void printValue(FILE *,char *,value *);
-static void freeValue(value *);
 static int  priority(char *v1);
 static int  isnum(value *v);
 static int  isparenthesis(value *v);
@@ -25,7 +24,7 @@ static queue*  convert(queue *i);
 //TODO add variables
 //TODO add file input
 //TODO add args
-//TODO ^, math.h???? 
+//TODO ^, math.h????
 //TODO remove order from print value
 //TODO makefile
 
@@ -46,6 +45,7 @@ int main(int argc, char **argv)
         {
             fp = fopen(argv[argc-1],"r");
         }
+        else fp = stdin;
     }
     else fp = stdin;
 
@@ -566,12 +566,6 @@ static void printValue(FILE *fp,char *order,value *v)
         fprintf(fp,"%s ",v->sval);
     else //must be a string
         fprintf(fp,"%s ",v->sval);
-}
-
-static void freeValue(value *v)
-{
-    if (v->type == STRING) free(v->sval);
-    free(v);
 }
 
 static int priority(char *v1)
