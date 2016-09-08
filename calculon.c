@@ -440,7 +440,7 @@ static queue* convert(queue *i) {
 static value *readValue(FILE *fp) { //Lusth's readValue, handles reading in values using scanner
     value *v;
     if (stringPending(fp))
-        v = newStringValue(readString(stdin));
+        v = newStringValue(readString(fp));
     else {
         char *token = readToken(fp);
         if (token == 0)
