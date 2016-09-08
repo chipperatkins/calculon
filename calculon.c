@@ -27,6 +27,8 @@ static queue*  convert(queue *i);
 //TODO ^, math.h????
 //TODO remove order from print value
 //TODO makefile
+//TODO var A = 0;
+//TODO check for varibale assignment
 
 int main(int argc, char **argv)
 {
@@ -528,7 +530,7 @@ static value *readValue(FILE *fp)
             v = newIntegerValue(atoi(token));
         else if (strcmp(token,"var")==0)
             v = newVarValue();
-        else if (token[0] > 'A' && token[0] < 'z')
+        else if (token[0] >= 'A' && token[0] <= 'z')
             v = newVariableValue(token);
         else if (*token == '+')
             v = newOperatorValue("+");
