@@ -33,7 +33,7 @@ static queue*  convert(queue *i);
 int main(int argc, char **argv)
 {
     FILE *fp;
-    int df = 0, vf = 0;
+    int df = 0, vf = 0,ec = 0;
     if (argc > 1)
     {
         for (int j = 1; j < argc; j++)
@@ -93,15 +93,25 @@ int main(int argc, char **argv)
         t1 = convert(t);
         enQQ(p,t1);
         enQ(p,deQ(i));
+        ec++;
     }
 
     while (p->front != 0 && df == 1)
     {
-        while (p->front->value->type != SEMICOLON)
+        while (p->front->value->type != SEMICOLON && ec == 1)
         {
             printValue(stdout, 0, deQ(p)->value);
         }
         deQ(p);
+        while (ec > 1)
+        {
+            while (p->front->value->type != SEMICOLON)
+            {
+                deQ(p);
+            }
+            deQ(p);
+            ec--;
+        }
     }
     if (df == 1) printf("\n");
     stack* s = newStack();
