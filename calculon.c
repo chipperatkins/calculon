@@ -415,7 +415,7 @@ static queue* convert(queue *i) {
 
         else { //operators on partially full stack
             if (isparenthesis(s->top->value) == 0) { //ensures not skipping paren
-                while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval)) //precendence
+                while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval) && isparenthesis(s->top->value) == 0) //precendence
                     enQ(p, pop(s));
                 push(s, deQ(i));
             }
@@ -451,7 +451,7 @@ static value *readValue(FILE *fp) { //Lusth's readValue, handles reading in valu
             v = newIntegerValue(atoi(token));
         else if (strcmp(token,"var")==0)
             v = newVarValue();
-        else if (token[0] >= 'A' && token[0] <= 'z')
+        else if ((token[0] >= 'A' && token[0] <= 'Z') || (token[0] >= 'a' && token[0] <= 'z'))
             v = newVariableValue(token);
         else if (*token == '+')
             v = newOperatorValue("+");
