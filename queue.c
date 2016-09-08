@@ -6,18 +6,17 @@
 
 static queue *makeSpace(void);
 
-queue *newQ()
-{
+/****** Public Interface ******/
+
+queue *newQ() {
     queue *q = makeSpace();
     q->front = 0;
     q->rear = 0;
     return q;
 }
 
-void enQ(queue *q,node *n)
-{
-    if(q->front == 0 && q->rear == 0)
-    {
+void enQ(queue *q,node *n) { //enqueues node
+    if(q->front == 0 && q->rear == 0) {
         q->front = q->rear = n;
         return;
     }
@@ -25,10 +24,8 @@ void enQ(queue *q,node *n)
     q->rear = n;
 }
 
-void enQQ(queue *q, queue *m)
-{
-    if (q->front == 0 && q->rear == 0)
-    {
+void enQQ(queue *q, queue *m) { //enqueues another queue
+    if (q->front == 0 && q->rear == 0) {
         q->front  = m->front;
         q->rear = m->rear;
         return;
@@ -37,27 +34,23 @@ void enQQ(queue *q, queue *m)
     q->rear = m->rear;
 }
 
-node* deQ(queue *q)
-{
+node* deQ(queue *q) { //dequeues node
     node *temp = q->front;
-    if(q->front == 0)
-    {
+    if(q->front == 0) {
         printf("Queue is Empty\n");
         return temp;
     }
     if(q->front == q->rear)
-    {
         q->front = q->rear = 0;
-    }
-    else
-    {
+    else {
         q->front = q->front->next;
     }
     return temp;
 }
 
-static queue *makeSpace()
-{
+/***** Private Methods *****/
+
+static queue *makeSpace() { //allocates space for queue
     queue *q = (queue *) malloc(sizeof(queue));
     if (q == 0) { fprintf(stderr,"out of memory"); exit(-1); }
     return q;

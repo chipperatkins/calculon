@@ -14,81 +14,65 @@ char *EQUALS = "EQUALS";
 
 static value *newValue(char *);
 
+/*****
+ * Lusth's Value Class modified for use in Assignment 1
+ */
+
 /*************** public interface *************/
 
-value *
-newIntegerValue(int v)
-    {
+value *newIntegerValue(int v) {
     value *n = newValue(INTEGER);
     n->ival = v;
     return n;
-    }
+}
 
-value *
-newRealValue(double v)
-    {
+value *newRealValue(double v) {
     value *n = newValue(REAL);
     n->rval = v;
     return n;
-    }
+}
 
-value *
-newStringValue(char *v)
-    {
+value *newStringValue(char *v) {
     value *n = newValue(STRING);
     n->sval = v;
     return n;
-    }
+}
 
-value *
-newVariableValue(char *v)
-    {
+value *newVariableValue(char *v) {
     value *n = newValue(VARIABLE);
     n->sval = v;
     return n;
-    }
+}
 
-value *
-newOperatorValue(char *v)
-    {
+value *newOperatorValue(char *v) {
     value *n = newValue(OPERATOR);
     n->sval = v;
     return n;
-    }
+}
 
-value *
-newParenthesisValue(char *v)
-{
+value *newParenthesisValue(char *v) {
     value *n = newValue(PARENTHESIS);
     n->sval = v;
     return n;
 }
 
-value*
-newVarValue()
-{
+value *newVarValue() {
     value *n = newValue(VAR);
     return n;
 }
 
-value *
-newEqualsValue(char *v)
-{
+value *newEqualsValue(char *v) {
     value *n = newValue(EQUALS);
     n->sval = v;
     return n;
 }
 
-value*
-newSemicolonValue()
-{
+value *newSemicolonValue() {
     value *n = newValue(SEMICOLON);
     return n;
 }
 
-void
-displayValue(FILE *fp,value *v)
-    {
+void displayValue(FILE *fp,value *v) {
     if (v->type == STRING)
        fprintf(fp,"\"%s\"",v->sval);
     else if (v->type == INTEGER)
@@ -103,15 +87,13 @@ displayValue(FILE *fp,value *v)
         fprintf(fp,"%s",v->sval);
     else
        fprintf(fp,"<UNKNOWN VALUE TYPE>");
-    }
+}
 
 /*************** private methods *************/
 
-value *
-newValue(char *t)
-    {
+value *newValue(char *t) { //allocates space for value
     value *n = malloc(sizeof(value));
     if (n == 0) { fprintf(stderr,"out of memory"); exit(-1); }
     n->type = t;
     return n;
-    }
+}

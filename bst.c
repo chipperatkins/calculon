@@ -5,22 +5,18 @@
 #include "bst.h"
 #include "string.h"
 
-//TODO allow duplicates
 //TODO make objective
 
 /***** Public Methods *****/
 
-bst *newBst()
-{
+bst *newBst() {
     bst *b = (bst *) malloc(sizeof(bst));
     if (b == 0) { fprintf(stderr,"out of memory"); exit(-1); }
     return b;
 }
 
-node *insert(node *n, node *d)
-{
-    if (n == 0)
-    {
+node *insert(node *n, node *d) { //inserts into bst
+    if (n == 0) {
         node *t;
         t = d;
         return t;
@@ -32,8 +28,7 @@ node *insert(node *n, node *d)
     return n;
 }
 
-node *findMin(node *n)
-{
+node *findMin(node *n) {
     if (n == 0)
         return 0;
     if (n->left != 0)
@@ -42,45 +37,13 @@ node *findMin(node *n)
         return n;
 }
 
-node *findMax(node *n)
-{
+node *findMax(node *n) {
     if (n == 0)
         return 0;
     if (n->right != 0)
         return findMax(n->right);
     else
         return n;
-}
-
-node *deleteNode(node *root, char *key)
-{
-    node *t;
-    if(root == 0)
-        return 0;
-    else if(strcmp(key,root->key)<0)
-        root->left = deleteNode(root->left,key);
-    else if(strcmp(key,root->key)>0)
-        root->right = deleteNode(root->right,key);
-    else
-    {
-        if (root->right != 0 && root->left != 0)
-        {
-            t = findMin(root->right);
-            root->value = t->value;
-            root->key = t->key;
-            root -> right = deleteNode(root->right,t->key);
-        }
-        else
-        {
-            t = root;
-            if (root->left == 0)
-                root = root->right;
-            else if (root->right == 0)
-                root = root->left;
-            free(t);
-        }
-    }
-    return root;
 }
 
 node *search(node *r, char *key)
@@ -95,14 +58,4 @@ node *search(node *r, char *key)
     {
         return r;
     }
-}
-
-void printInOrder(node *r)
-{
-    if (r==0)
-        return;
-
-    printf("\"%s\" ",r->key);
-    printInOrder(r->left);
-    printInOrder(r->right);
 }
