@@ -25,17 +25,40 @@ static queue*  convert(queue *i);
 //TODO add variables
 //TODO add file input
 //TODO add args
-//TODO ^, math.h????
+//TODO ^, math.h???? 
+//TODO remove order from print value
+//TODO makefile
 
 int main(int argc, char **argv)
 {
+    FILE *fp;
+    int df = 0, vf = 0;
+    if (argc > 1)
+    {
+        for (int j = 1; j < argc; j++)
+        {
+            if (strcmp(argv[j],"-d")==0)
+                df = 1;
+            else if (strcmp(argv[j],"-v")==0)
+                vf = 1;
+        }
+        if (strcmp(argv[argc-1],"-d")!=0&&strcmp(argv[argc-1],"-v")!=0)
+        {
+            fp = fopen(argv[argc-1],"r");
+        }
+    }
+    else fp = stdin;
+
+    if (vf == 1)
+    {
+        printf("Patrick V. Atkins\n");
+        return 0;
+    }
     queue *i,*p;
     i = newQ();
     p = newQ();
     node *bstRoot = 0;
 
-    FILE *fp;
-    fp = stdin;
     value *v = readValue(fp);
     while (v->type == VAR)
     {
@@ -70,7 +93,7 @@ int main(int argc, char **argv)
         enQ(p,deQ(i));
     }
 
-    while (p->front != 0)
+    while (p->front != 0 && df == 1)
     {
         while (p->front->value->type != SEMICOLON)
         {
@@ -78,7 +101,7 @@ int main(int argc, char **argv)
         }
         deQ(p);
     }
-
+    if (df == 1) printf("\n");
     stack* s = newStack();
     while(p->front!=0)
     {
@@ -95,9 +118,8 @@ int main(int argc, char **argv)
             else if (p->front->value->type == EQUALS)
             {
                 deQ(p);
-                value *temp;
-                temp = search(bstRoot,p->front->value->sval)->value;
-                temp = s->top->value;
+                search(bstRoot,p->front->value->sval)->value = s->top->value;
+                pop(s);
             }
             else if (p->front->value->type == OPERATOR) //must have 2 operands on stack
             {
@@ -341,6 +363,20 @@ int main(int argc, char **argv)
                         push(s,retVal);
                         deQ(p);
                     }
+                    else if (temp->value->type == STRING && s->top->value->type == INTEGER)
+                    {
+                        int i = atoi(temp->value->sval);
+                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival % i),0);
+                        push(s,retVal);
+                        deQ(p);
+                    }
+                    else if (temp->value->type == INTEGER && s->top->value->type == STRING)
+                    {
+                        int i = atoi(pop(s)->value->sval);
+                        retVal = newValueNode(newIntegerValue(i % temp->value->ival),0);
+                        push(s,retVal);
+                        deQ(p);
+                    }
                 }
                 else if (strcmp(p->front->value->sval,"^")==0)
                 {
@@ -403,9 +439,8 @@ int main(int argc, char **argv)
 
         if (p->front == 0)
         {
-            printf("d here: %d\n",s->top->value->ival);
-            printf("lf here: %lf\n",s->top->value->rval);
-            printf("s here: %s\n",s->top->value->sval);
+            printValue(stdout,0, s->top->value);
+            printf("\n");
         }
     }
     return 0;
@@ -524,13 +559,13 @@ static value *readValue(FILE *fp)
 static void printValue(FILE *fp,char *order,value *v)
 {
     if (v->type == INTEGER)
-        fprintf(fp,"The %s value is an integer: %d\n",order,v->ival);
+        fprintf(fp,"%d ",v->ival);
     else if (v->type == REAL)
-        fprintf(fp,"The %s value is a real: %f\n",order,v->rval);
+        fprintf(fp,"%f ",v->rval);
     else if (v->type == OPERATOR)
-        fprintf(fp,"The %s value is an operator: %s\n",order,v->sval);
+        fprintf(fp,"%s ",v->sval);
     else //must be a string
-        fprintf(fp,"The %s value is a string: %s\n",order,v->sval);
+        fprintf(fp,"%s ",v->sval);
 }
 
 static void freeValue(value *v)

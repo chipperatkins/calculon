@@ -74,7 +74,7 @@ newVarValue()
 value *
 newEqualsValue(char *v)
 {
-    value *n = newVarValue(EQUALS);
+    value *n = newValue(EQUALS);
     n->sval = v;
     return n;
 }
