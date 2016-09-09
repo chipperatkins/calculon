@@ -21,9 +21,7 @@ static int  isparenthesis(value *);
 static queue* convert(queue *);
 static void postfixProccess(queue *,node*);
 
-//TODO makefile
 //TODO strcmp args?
-//TODO fix equals assignment?
 //TODO check evolution of my solution
 //TODO tidy math more?
 
@@ -103,21 +101,31 @@ static void postfixProccess(queue *p,node* bstRoot) {
     stack* s = newStack();
     while(p->front!=0) { //loop through all of p
         while (p->front->value->type != SEMICOLON) { //delimited by ;
-            if (p->front->value->type == VARIABLE) { //handle variables by looking up in tree
-                value *temp;
-                temp = search(bstRoot,p->front->value->sval)->value;
-                p->front->value = temp;
-            }
             if (isnum(p->front->value)==1) //handle legal operands
                 push(s,deQ(p));
             else if (p->front->value->type == EQUALS) { // handle equals signs (complex assignment) a = EXPRESSION
                 deQ(p);
-                search(bstRoot,p->front->value->sval)->value = s->top->value;
+                if (s->top->value->type == VARIABLE) { //handle variables by looking up in tree
+                    value *temp1;
+                    temp1 = search(bstRoot,s->top->value->sval)->value;
+                    s->top->value = temp1;
+                }
+                search(bstRoot,s->top->next->value->sval)->value = s->top->value;
                 pop(s);
             }
             else if (p->front->value->type == OPERATOR) { //must have 2 operands on stack, handles operators
                 node* temp,*retVal; //temp used to hold arg1, retVal stores result
                 temp = pop(s);
+                if (s->top->value->type == VARIABLE) { //handle variables by looking up in tree
+                    value *temp1;
+                    temp1 = search(bstRoot,s->top->value->sval)->value;
+                    s->top->value = temp1;
+                }
+                if (temp->value->type == VARIABLE) { //handle variables by looking up in tree
+                    value *temp1;
+                    temp1 = search(bstRoot,temp->value->sval)->value;
+                    temp->value = temp1;
+                }
                 if (strcmp(p->front->value->sval,"+")==0) { // addition for all operator type combinations
                     if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
                         retVal = newValueNode(newIntegerValue(pop(s)->value->ival + temp->value->ival),0);
@@ -391,6 +399,11 @@ static void postfixProccess(queue *p,node* bstRoot) {
         deQ(p);
 
         if (p->front == 0) { //print last expression answer
+            if (s->top->value->type == VARIABLE) { //handle variables by looking up in tree
+                value *temp1;
+                temp1 = search(bstRoot,s->top->value->sval)->value;
+                s->top->value = temp1;
+            }
             printValue(stdout, s->top->value);
             printf("\n");
         }
@@ -406,9 +419,11 @@ static queue* convert(queue *i) {
     while(i->front != 0) { //loop through all infix
         //variable followed by equals for assignment
         if (i->front->next != 0 && i->front->value->type == VARIABLE && i->front->next->value->type == EQUALS) {
-            f = 1;
+            /*f = 1;
             vmem = deQ(i)->value;
-            deQ(i);
+            deQ(i);*/
+            enQ(p,deQ(i));
+            push(s,deQ(i));
         }
         else if (isnum(i->front->value)==1) //handles operators
             enQ(p, deQ(i));
