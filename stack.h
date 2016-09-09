@@ -7,4 +7,3 @@ typedef struct stack
 extern stack *newStack();
 extern void push(stack *s,node *n);
 extern node* pop(stack *s);
-extern void destroy(stack *s);

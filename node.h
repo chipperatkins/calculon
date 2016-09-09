@@ -9,4 +9,3 @@ typedef struct nodeobject
 
 extern node *newValueNode(value *v,node *next);
 extern node *newBstNode(value *v, char* key, node *left, node *right);
-extern char* getKey(node *n);
