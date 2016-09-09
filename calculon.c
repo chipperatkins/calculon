@@ -108,7 +108,7 @@ static void postfixProccess(queue *p,node* bstRoot) {
                 temp = search(bstRoot,p->front->value->sval)->value;
                 p->front->value = temp;
             }
-            if (isnum(p->front->value)==1) //handle legal operators
+            if (isnum(p->front->value)==1) //handle legal operands
                 push(s,deQ(p));
             else if (p->front->value->type == EQUALS) { // handle equals signs (complex assignment) a = EXPRESSION
                 deQ(p);
