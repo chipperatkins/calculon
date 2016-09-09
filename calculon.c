@@ -22,6 +22,10 @@ static queue* convert(queue *);
 static void postfixProccess(queue *,node*);
 
 //TODO makefile
+//TODO strcmp args?
+//TODO fix equals assignment?
+//TODO check evolution of my solution
+//TODO tidy math more?
 
 int main(int argc, char **argv) {
     FILE *fp; //file to be read from will be set to stdin by default
@@ -325,6 +329,16 @@ static void postfixProccess(queue *p,node* bstRoot) {
                         push(s,retVal);
                         deQ(p);
                     }
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
+                        retVal = newValueNode(newIntegerValue((int)pop(s)->value->rval % temp->value->ival),0);
+                        push(s,retVal);
+                        deQ(p);
+                    }
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
+                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival % (int)temp->value->rval),0);
+                        push(s,retVal);
+                        deQ(p);
+                    }
                 }
                 else if (strcmp(p->front->value->sval,"^")==0) { //exponentiation for all types stored in REAL
                     if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
@@ -415,7 +429,7 @@ static queue* convert(queue *i) {
 
         else { //operators on partially full stack
             if (isparenthesis(s->top->value) == 0) { //ensures not skipping paren
-                while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval) && isparenthesis(s->top->value) == 0) //precendence
+                while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval)) //precendence
                     enQ(p, pop(s));
                 push(s, deQ(i));
             }
@@ -491,7 +505,7 @@ static void printValue(FILE *fp,value *v) { //Lusth's modified printValue handle
 }
 
 static int priority(char *v1) { //checks operator precendence using index in string
-    char * p = "=+-*/%^()";
+    char * p = "=+-*/%^";
     char * i;
     char c = v1[0];
     int index;
