@@ -1,3 +1,6 @@
+/*
+ * Lusth's value header modified for use in Assignment by Chipper Atkins
+ */
 typedef struct valueobject
     {
     char *type;

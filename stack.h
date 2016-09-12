@@ -1,3 +1,7 @@
+/***
+ * stack header file
+ * Author: Chipper Atkins
+ */
 typedef struct stack
 {
     struct nodeobject *top;

@@ -1,3 +1,7 @@
+/****
+ * queue source file
+ * Author: Chipper Atkins
+ ****/
 #include <stdio.h>
 #include <stdlib.h>
 #include "value.h"

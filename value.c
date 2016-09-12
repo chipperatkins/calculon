@@ -15,7 +15,7 @@ char *EQUALS = "EQUALS";
 static value *newValue(char *);
 
 /*****
- * Lusth's Value Class modified for use in Assignment 1
+ * Lusth's Value Class modified for use in Assignment 1 by Chipper Atkins
  */
 
 /*************** public interface *************/

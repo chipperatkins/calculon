@@ -1,3 +1,7 @@
+/****
+ * queue header file
+ * Author: Chipper Atkins
+ ****/
 typedef struct queue
 {
     struct nodeobject *front;
