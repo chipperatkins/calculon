@@ -1,3 +1,7 @@
+/*****
+ * node header file
+ * Author: Chipper Atkins
+ *****/
 typedef struct nodeobject
     {
     value *value;

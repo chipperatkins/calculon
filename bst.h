@@ -1,3 +1,7 @@
+/*****
+ * BST header file
+ * Author: Chipper Atkins
+ *****/
 typedef struct bst
 {
     struct nodeobject *root;

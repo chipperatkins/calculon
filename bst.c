@@ -1,11 +1,13 @@
+/*****
+ * BST source file
+ * Author: Chipper Atkins
+ *****/
 #include <stdio.h>
 #include <stdlib.h>
 #include "value.h"
 #include "node.h"
 #include "bst.h"
 #include "string.h"
-
-//TODO make objective
 
 /***** Public Methods *****/
 

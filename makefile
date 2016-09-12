@@ -28,3 +28,5 @@ queue.o : queue.c queue.h node.h value.h
 clean :
 	rm -f $(OBJS) calculon
 
+test:	./calculon 
+	./calculon test

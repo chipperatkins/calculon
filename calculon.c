@@ -1,3 +1,8 @@
+/*****
+ * Main Calculon Source File
+ * Author: Chipper Atkins
+ *****/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdarg.h>
@@ -21,81 +26,76 @@ static int  isparenthesis(value *);
 static queue* convert(queue *);
 static void postfixProccess(queue *,node*);
 
-//TODO strcmp args?
-//TODO check evolution of my solution
-//TODO tidy math more?
 
 int main(int argc, char **argv) {
-    FILE *fp; //file to be read from will be set to stdin by default
+    FILE *fp;
 
     // option handling df, vf, and ec flags and expression count respectively
     int df = 0, vf = 0,ec = 0;
     if (argc > 1) {
-        for (int j = 1; j < argc; j++) { //loop args & set flags
+        for (int j = 1; j < argc; j++) {
             if (strcmp(argv[j],"-d")==0) df = 1;
             else if (strcmp(argv[j],"-v")==0)vf = 1;
         }
         if (strcmp(argv[argc-1],"-d")!=0&&strcmp(argv[argc-1],"-v")!=0)
-            fp = fopen(argv[argc-1],"r"); //set fp to FILENAME if last arg not -d or -v
+            fp = fopen(argv[argc-1],"r");
         else fp = stdin; //stdin by default
     }
     else fp = stdin;
-    if (vf == 1) Fatal("Patrick V. Atkins\n"); //if -v
+    if (vf == 1) {printf("Patrick V. Atkins\n");Fatal("");} //if -v
 
     queue *i = newQ(),*p = newQ(); //infix and postfix queues
     node *bstRoot = 0;
 
     value *v = readValue(fp);
-    while (v->type == VAR) { //read values and fill tree
+    while (v->type == VAR) {
         value *k = readValue(fp); // var name
         v = readValue(fp); // =
         v = readValue(fp);  // var assignment
-        bstRoot = insert(bstRoot,newBstNode(v,k->sval,0,0)); //insert into bst
+        bstRoot = insert(bstRoot,newBstNode(v,k->sval,0,0));
         v = readValue(fp); // semicolon
-        v = readValue(fp); // next operation
+        v = readValue(fp); // next
     }
 
-    while (!feof(fp)) { //read input
-        while (v->type != SEMICOLON) { //semicolon delimited
-            if (v->type == VARIABLE && search(bstRoot,v->sval) == 0) //checks if var declared
+    while (!feof(fp)) {
+        while (v->type != SEMICOLON) {
+            if (v->type == VARIABLE && search(bstRoot,v->sval) == 0)
                 Fatal("variable %s was not declared\n",v->sval);
             enQ(i, newValueNode(v, 0));
             v = readValue(fp);
         }
         enQ(i,newValueNode(newSemicolonValue(),0)); //puts semicolon value at the end
-        v = readValue(fp); //continues on until EOF
+        v = readValue(fp);
     }
 
-    while(i->front != 0) { //converts infix to postfix delimited by ;
+    while(i->front != 0) {
         queue *t = newQ();
         while (i->front->value->type != SEMICOLON)
             enQ(t,deQ(i));
         queue *t1;
         t1 = convert(t);
         enQQ(p,t1); //p stored as a queue of postfix queues delimited by ;
-        enQ(p,deQ(i)); // enQ ;
-        ec++; //increment expression count
+        enQ(p,deQ(i));
+        ec++;
     }
 
-    while (p->front != 0 && df == 1) { //-d option print values postifx
-        while (p->front->value->type != SEMICOLON && ec == 1) //if only 1 expression in p queue
+    while (p->front != 0 && df == 1) {
+        while (p->front->value->type != SEMICOLON && ec == 1)
             printValue(stdout, deQ(p)->value);
         deQ(p);
-        while (ec > 1) { //if > 1 expression loop to last expression
+        while (ec > 1) {
             while (p->front->value->type != SEMICOLON)
                 deQ(p);
-            deQ(p); //deQ ;
+            deQ(p);
             ec--;
         }
     }
-    if (df == 1) {printf("\n"); Fatal("");} //exit if -d
+    if (df == 1) {printf("\n"); Fatal("");}
 
-    postfixProccess(p,bstRoot); //Proccess postfix and print result of last expression
+    postfixProccess(p,bstRoot);
     return 0;
 }
 
-//TODO investigate -d with var assignment complex
-//TODO investigate other answers on stack possibility
 static void postfixProccess(queue *p,node* bstRoot) {
     //postfix proccessing
     stack* s = newStack();
@@ -114,7 +114,7 @@ static void postfixProccess(queue *p,node* bstRoot) {
                 pop(s);
             }
             else if (p->front->value->type == OPERATOR) { //must have 2 operands on stack, handles operators
-                node* temp,*retVal; //temp used to hold arg1, retVal stores result
+                node* temp; //temp used to hold arg1, retVal stores result
                 temp = pop(s);
                 if (s->top->value->type == VARIABLE) { //handle variables by looking up in tree
                     value *temp1;
@@ -127,273 +127,159 @@ static void postfixProccess(queue *p,node* bstRoot) {
                     temp->value = temp1;
                 }
                 if (strcmp(p->front->value->sval,"+")==0) { // addition for all operator type combinations
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival + temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval + temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->ival + temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval + temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival + temp->value->ival),0));
+                    else if (temp->value->type == REAL && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval + temp->value->rval),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pop(s)->value->ival + temp->value->rval),0));
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval + temp->value->ival),0));
                     else if (temp->value->type == STRING && s->top->value->type == STRING) {
                         char *temp2 = pop(s)->value->sval;
                         char *c = malloc(sizeof(char) * (strlen(temp->value->sval) + strlen(temp2) + 1));
                         if (c==0) Fatal("out of memory\n");
                         sprintf(c,"%s%s",temp2,temp->value->sval);
-                        retVal = newValueNode(newStringValue(c),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newStringValue(c),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival + i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival + i),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newIntegerValue(i + temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(i + temp->value->ival),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == REAL) {
                         double i = atof(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval + i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval + i), 0));
                     }
                     else if (temp->value->type == REAL && s->top->value->type == STRING) {
                         double i = atof(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(i + temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(i + temp->value->rval),0));
                     }
                 }
                 else if (strcmp(p->front->value->sval,"-")==0) {//subtraction for all types
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival - temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval - temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->ival - temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval - temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival - temp->value->ival),0));
+                    else if (temp->value->type == REAL && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval - temp->value->rval),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pop(s)->value->ival - temp->value->rval),0));
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval - temp->value->ival),0));
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival - i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival - i),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newIntegerValue(i - temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(i - temp->value->ival),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == REAL) {
                         double i = atof(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval - i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval - i),0));
                     }
                     else if (temp->value->type == REAL && s->top->value->type == STRING) {
                         double i = atof(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(i - temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(i - temp->value->rval),0));
                     }
                 }
                 else if (strcmp(p->front->value->sval,"*")==0) {//multiplication for all types
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival * temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval * temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->ival * temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval * temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival * temp->value->ival),0));
+                    else if (temp->value->type == REAL && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval * temp->value->rval),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pop(s)->value->ival * temp->value->rval),0));
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval * temp->value->ival),0));
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival * i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival * i),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newIntegerValue(i * temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(i * temp->value->ival),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == REAL) {
                         double i = atof(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval * i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval * i),0));
                     }
                     else if (temp->value->type == REAL && s->top->value->type == STRING) {
                         double i = atof(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(i * temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(i * temp->value->rval),0));
                     }
                 }
                 else if (strcmp(p->front->value->sval,"/")==0) {//division for all types
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival / temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval / temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->ival / temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval / temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival / temp->value->ival),0));
+                    else if (temp->value->type == REAL && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval / temp->value->rval),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pop(s)->value->ival / temp->value->rval),0));
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval / temp->value->ival),0));
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival * i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival * i),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newIntegerValue(i * temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(i * temp->value->ival),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == REAL) {
                         double i = atof(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pop(s)->value->rval * i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pop(s)->value->rval * i),0));
                     }
                     else if (temp->value->type == REAL && s->top->value->type == STRING) {
                         double i = atof(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(i * temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(i * temp->value->rval),0));
                     }
                 }
                 else if (strcmp(p->front->value->sval,"%")==0) { //modulous for INTs and Strings containing INTS
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival % temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival % temp->value->ival),0));
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival % i),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival % i),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newIntegerValue(i % temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newIntegerValue(i % temp->value->ival),0));
                     }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newIntegerValue((int)pop(s)->value->rval % temp->value->ival),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newIntegerValue(pop(s)->value->ival % (int)temp->value->rval),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newIntegerValue((int)pop(s)->value->rval % temp->value->ival),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newIntegerValue(pop(s)->value->ival % (int)temp->value->rval),0));
                 }
                 else if (strcmp(p->front->value->sval,"^")==0) { //exponentiation for all types stored in REAL
-                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->ival,temp->value->ival)),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->rval,temp->value->rval)),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == REAL && s->top->value->type == INTEGER) {
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->ival,temp->value->rval)),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
-                    else if (temp->value->type == INTEGER && s->top->value->type == REAL) {
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->rval,temp->value->ival)),0);
-                        push(s,retVal);
-                        deQ(p);
-                    }
+                    if (temp->value->type == INTEGER && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->ival,temp->value->ival)),0));
+                    else if (temp->value->type == REAL && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->rval,temp->value->rval)),0));
+                    else if (temp->value->type == REAL && s->top->value->type == INTEGER)
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->ival,temp->value->rval)),0));
+                    else if (temp->value->type == INTEGER && s->top->value->type == REAL)
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->rval,temp->value->ival)),0));
                     else if (temp->value->type == STRING && s->top->value->type == INTEGER) {
                         int i = atoi(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->ival,i)),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->ival,i)),0));
                     }
                     else if (temp->value->type == INTEGER && s->top->value->type == STRING) {
                         int i = atoi(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(pow(i,temp->value->ival)),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pow(i,temp->value->ival)),0));
                     }
                     else if (temp->value->type == STRING && s->top->value->type == REAL) {
                         double i = atof(temp->value->sval);
-                        retVal = newValueNode(newRealValue(pow(pop(s)->value->rval,i)),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pow(pop(s)->value->rval,i)),0));
                     }
                     else if (temp->value->type == REAL && s->top->value->type == STRING) {
                         double i = atof(pop(s)->value->sval);
-                        retVal = newValueNode(newRealValue(pow(i,temp->value->rval)),0);
-                        push(s,retVal);
-                        deQ(p);
+                        push(s,newValueNode(newRealValue(pow(i,temp->value->rval)),0));
                     }
                 }
+                deQ(p);
             }
         }
         deQ(p);
@@ -414,36 +300,31 @@ static void postfixProccess(queue *p,node* bstRoot) {
 static queue* convert(queue *i) {
     queue *p = newQ(); //postfix queue
     stack *s = newStack();
-    int f = 0; //flag for variable assignment
-    value *vmem; //variable memory for variable assignment
     while(i->front != 0) { //loop through all infix
-        //variable followed by equals for assignment
+        //assignment
         if (i->front->next != 0 && i->front->value->type == VARIABLE && i->front->next->value->type == EQUALS) {
-            /*f = 1;
-            vmem = deQ(i)->value;
-            deQ(i);*/
             enQ(p,deQ(i));
             push(s,deQ(i));
         }
         else if (isnum(i->front->value)==1) //handles operators
             enQ(p, deQ(i));
 
-        else if (isparenthesis(i->front->value)==1) {//handles parentheses
-            if (strcmp(i->front->value->sval,"(")==0) //open paren
+        else if (isparenthesis(i->front->value)==1) {
+            if (strcmp(i->front->value->sval,"(")==0)
                 push(s,deQ(i));
             else { //closed paren
                 while (strcmp(s->top->value->sval,"(")!=0) //loop back to open, pop stack
                     enQ(p, pop(s));
-                pop(s); //get red of open
-                deQ(i); //get red of closed
+                pop(s);
+                deQ(i);
             }
         }
 
-        else if (i->front->value->type == OPERATOR && s->top == 0) //handles operators on empty stack
+        else if (i->front->value->type == OPERATOR && s->top == 0)
             push(s, deQ(i));
 
         else { //operators on partially full stack
-            if (isparenthesis(s->top->value) == 0) { //ensures not skipping paren
+            if (isparenthesis(s->top->value) == 0) {
                 while (s->top != 0 && priority(i->front->value->sval) <= priority(s->top->value->sval)) //precendence
                     enQ(p, pop(s));
                 push(s, deQ(i));
@@ -452,16 +333,12 @@ static queue* convert(queue *i) {
         }
     }
 
-    if (s->top != 0) { //finishes by clearing stack
+    if (s->top != 0) {
         while (s->top != 0) {
             if (isparenthesis(s->top->value)==0)
                 enQ(p, pop(s));
             else pop(s);
         }
-    }
-    if (f == 1) { //handles assignment by added = and vmem at end of postfix to be handled by processPostfix
-        enQ(p,newValueNode(newEqualsValue("="),0));
-        enQ(p,newValueNode(vmem,0));
     }
     return p;
 }
@@ -519,7 +396,7 @@ static void printValue(FILE *fp,value *v) { //Lusth's modified printValue handle
         fprintf(fp,"%s ",v->sval);
 }
 
-static int priority(char *v1) { //checks operator precendence using index in string
+static int priority(char *v1) {
     char * p = "=+-*/%^";
     char * i;
     char c = v1[0];
